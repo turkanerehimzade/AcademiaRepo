@@ -37,4 +37,3 @@ out/
 .vscode/
 clean-repo/
 
-src/main/resources/application.yml

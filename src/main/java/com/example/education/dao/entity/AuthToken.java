@@ -23,6 +23,7 @@ public class AuthToken extends BaseEntity {
     private String accessToken;
     @Column(name = "refresh_token")
     private String refreshToken;
+    @Column(name = "user_principal")
     private UserPrincipal userPrincipal;
 
 }
