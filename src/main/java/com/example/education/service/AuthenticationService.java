@@ -5,6 +5,8 @@ import com.example.education.dao.repository.UserRepository;
 import com.example.education.dto.request.auth.ChangePasswordRequest;
 import com.example.education.dto.request.auth.SignInRequest;
 import com.example.education.dto.response.user.UserLoginResponse;
+import com.example.education.dto.response.user.UserSignInResponse;
+import com.example.education.mapper.UserMapper;
 import com.example.education.security.UserPrincipal;
 import com.example.education.security.jwt.JwtProvider;
 import com.example.education.validation.AuthValidation;
@@ -32,23 +34,30 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final AuthTokenService authTokenService;
+    private final UserMapper userMapper;
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public AuthenticationService(AuthenticationManager authenticationManager, JwtProvider jwtProvider, AuthTokenService authTokenService, AuthValidation authValidation, UserRepository userRepository) {
+    public AuthenticationService(AuthenticationManager authenticationManager, JwtProvider jwtProvider, AuthTokenService authTokenService, AuthValidation authValidation, UserRepository userRepository,UserMapper userMapper) {
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.authTokenService = authTokenService;
         this.authValidation = authValidation;
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
+
     }
 
     private UserLoginResponse getLoginResponse(UserPrincipal userPrincipal) {
         String accessToken = jwtProvider.generateToken(userPrincipal, JWT_ACCESS_EXPIRATION_IN_MS);
         String refreshToken = jwtProvider.generateToken(userPrincipal, JWT_REFRESH_EXPIRATION_IN_MS);
-        System.out.println(accessToken);
-        System.out.println(refreshToken);
         authTokenService.saveTokenInfo(userPrincipal, accessToken, refreshToken);
-        return new UserLoginResponse().setAccessToken(accessToken).setRefreshToken(refreshToken);
+        User user= userRepository.findByEmail(userPrincipal.getUsername()).orElseThrow();
+        UserSignInResponse userSignInResponse= userMapper.toSignInResponse(user);
+        UserLoginResponse userLoginResponse = new UserLoginResponse();
+        userLoginResponse.setUser(userSignInResponse);
+        userLoginResponse.setAccessToken(accessToken);
+        userLoginResponse.setRefreshToken(refreshToken);
+        return userLoginResponse;
     }
 
     public ResponseEntity<UserLoginResponse> signInAndReturnJWT(SignInRequest signInRequest) {
