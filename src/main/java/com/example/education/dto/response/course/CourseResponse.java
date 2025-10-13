@@ -2,6 +2,7 @@ package com.example.education.dto.response.course;
 
 import com.example.education.dao.entity.material.Material;
 import com.example.education.dto.response.material.MaterialResponse;
+import com.example.education.dto.response.topic.TopicResponse;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.OneToMany;
 import lombok.*;
@@ -19,5 +20,5 @@ public class CourseResponse {
     private Long id;
     private String title;
     private String description;
-    private List<MaterialResponse> materials;
+    private List<TopicResponse> topics;
 }

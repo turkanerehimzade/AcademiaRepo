@@ -6,6 +6,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Entity
 @ToString
@@ -19,5 +22,13 @@ public class Question extends BaseEntity {
     @JoinColumn(name = "material_id")
     private Material material;
     private String question;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "question_options",
+            joinColumns = @JoinColumn(name = "question_id")
+    )
+    @Column(name = "option_text")
+    private List<String> options = new ArrayList<>();
     private String answer;
 }

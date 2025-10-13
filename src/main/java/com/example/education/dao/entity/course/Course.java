@@ -2,6 +2,7 @@ package com.example.education.dao.entity.course;
 
 import com.example.education.dao.entity.BaseEntity;
 import com.example.education.dao.entity.material.Material;
+import com.example.education.dao.entity.topic.Topic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -24,6 +25,6 @@ public class Course extends BaseEntity {
     private String title;
     private String description;
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Material> materials;
+    private List<Topic> topics;
     private String fotoUrl;
 }

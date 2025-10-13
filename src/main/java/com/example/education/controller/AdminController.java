@@ -5,10 +5,12 @@ import com.example.education.dto.request.course.CourseRequest;
 import com.example.education.dto.request.interview.InterviewRequest;
 import com.example.education.dto.request.material.MaterialRequest;
 import com.example.education.dto.request.question.QuestionRequest;
+import com.example.education.dto.request.topic.TopicRequest;
 import com.example.education.dto.response.base.SuccessResponse;
 import com.example.education.dto.response.course.CourseResponse;
 import com.example.education.dto.response.material.MaterialResponse;
 import com.example.education.dto.response.question.QuestionResponse;
+import com.example.education.dto.response.topic.TopicResponse;
 import com.example.education.dto.response.user.UserResponse;
 import com.example.education.enums.RoleName;
 import com.example.education.service.*;
@@ -27,6 +29,7 @@ public class AdminController {
     private final CourseService courseService;
     public final MaterialService materialService;
     private final QuestionService questionService;
+    private final TopicService topicService;
 
     @PostMapping("/question")
     public SuccessResponse<QuestionResponse> addQuestion(@RequestBody QuestionRequest questionRequest) {
@@ -35,6 +38,10 @@ public class AdminController {
     @PostMapping("/material")
     public SuccessResponse<MaterialResponse> addMaterial(@RequestBody MaterialRequest request) {
         return materialService.addMaterial(request);
+    }
+    @PostMapping("/topic")
+    public SuccessResponse<TopicResponse> addTopic(@RequestBody TopicRequest request) {
+        return topicService.addTopic(request);
     }
 
     @PostMapping("/sign-up")
