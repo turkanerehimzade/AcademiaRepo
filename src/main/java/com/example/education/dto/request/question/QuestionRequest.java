@@ -1,6 +1,8 @@
 package com.example.education.dto.request.question;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -10,5 +12,6 @@ import lombok.*;
 public class QuestionRequest {
     private Long materialId;
     private String question;
+    private List<String> options;
     private String answer;
 }

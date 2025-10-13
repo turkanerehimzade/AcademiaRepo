@@ -2,8 +2,10 @@ package com.example.education.service;
 
 import com.example.education.dao.entity.course.Course;
 import com.example.education.dao.entity.material.Material;
+import com.example.education.dao.entity.topic.Topic;
 import com.example.education.dao.repository.CourseRepository;
 import com.example.education.dao.repository.MaterialRepository;
+import com.example.education.dao.repository.TopicRepository;
 import com.example.education.dto.request.material.MaterialRequest;
 import com.example.education.dto.response.base.SuccessResponse;
 import com.example.education.dto.response.material.MaterialResponse;
@@ -22,10 +24,11 @@ import java.util.stream.Collectors;
 public class MaterialService {
     private final MaterialRepository materialRepository;
     private final CourseRepository courseRepository;
+    private final TopicRepository topicRepository;
     public SuccessResponse<MaterialResponse> addMaterial(MaterialRequest materialRequest) {
-        Course course = courseRepository.findById(materialRequest.getCourseId()).orElseThrow(() -> new RuntimeException("Course Not Found"));
+        Topic topic = topicRepository.findById(materialRequest.getTopicId()).orElseThrow(() -> new RuntimeException("Topic Not Found"));
         Material material = MaterialMapper.INSTANCE.entityToRequest(materialRequest);
-        material.setCourse(course);
+        material.setTopic(topic);
         materialRepository.save(material);
         MaterialResponse materialResponse = MaterialMapper.INSTANCE.entityToResponse(material);
         return SuccessResponse.createSuccessResponse(materialResponse, ResponseCode.SUCCESS);

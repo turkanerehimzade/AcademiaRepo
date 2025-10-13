@@ -10,9 +10,11 @@ import com.example.education.dto.response.PageResponse;
 import com.example.education.dto.response.base.SuccessResponse;
 import com.example.education.dto.response.course.CourseResponse;
 import com.example.education.dto.response.material.MaterialResponse;
+import com.example.education.dto.response.topic.TopicResponse;
 import com.example.education.enums.ResponseCode;
 import com.example.education.mapper.CourseMapper;
 import com.example.education.mapper.MaterialMapper;
+import com.example.education.mapper.TopicMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,16 +33,33 @@ public class CourseService {
     private final CourseMapper courseMapper;
     private final QuestionRepository questionRepository;
 
-    public SuccessResponse<CourseResponse> getCourseById(Long id){
-        Course course = courseRepository.findCourseById(id).orElseThrow(() -> new RuntimeException("Course not found..." ));
-        CourseResponse courseResponse= CourseMapper.INSTANCE.entityToResponse(course);
-        List<Material> materials =materialRepository.findByCourseId(id);
-        List<MaterialResponse> materialResponses = materials.stream()
-                .map(MaterialMapper.INSTANCE::entityToResponse)
+    public SuccessResponse<CourseResponse> getCourseById(Long id) {
+        Course course = courseRepository.findCourseById(id)
+                .orElseThrow(() -> new RuntimeException("Course not found..."));
+
+        // Course içindəki Topic-ləri və onların Material-larını mapper-lə çeviririk
+        CourseResponse courseResponse = CourseMapper.INSTANCE.entityToResponse(course);
+
+        // Hər topic üçün materialları mapper-lə çeviririk
+        List<TopicResponse> topicResponses = course.getTopics().stream()
+                .map(topic -> {
+                    TopicResponse topicResponse = TopicMapper.INSTANCE.entityToResponse(topic);
+
+                    List<MaterialResponse> materialResponses = topic.getMaterials().stream()
+                            .map(MaterialMapper.INSTANCE::entityToResponse)
+                            .collect(Collectors.toList());
+
+                    topicResponse.setMaterials(materialResponses);
+                    return topicResponse;
+                })
                 .collect(Collectors.toList());
-        courseResponse.setMaterials(materialResponses);
+
+        // Topic-ləri courseResponse-ə əlavə edirik
+        courseResponse.setTopics(topicResponses);
+
         return SuccessResponse.createSuccessResponse(courseResponse, ResponseCode.SUCCESS);
     }
+
 
     public SuccessResponse<CourseResponse> createCourse(CourseRequest courseRequest){
         Course course=CourseMapper.INSTANCE.requestToEntity(courseRequest);

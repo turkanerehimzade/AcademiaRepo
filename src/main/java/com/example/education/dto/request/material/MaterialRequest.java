@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @ToString
 public class MaterialRequest {
-    private Long courseId;
+    private Long topicId;
     private String title;
     private String description;
     private String content;

@@ -17,6 +17,7 @@ import java.util.List;
 @Builder
 @ToString
 public class MaterialResponse {
+    private Long id;
     private String title;
     private String description;
     private String content;
