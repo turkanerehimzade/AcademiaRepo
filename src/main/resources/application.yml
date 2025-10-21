@@ -44,3 +44,9 @@ authentication:
       expiration-in-ms: 120000000
     refresh:
       expiration-in-ms: 600000000
+aws:
+  accessKeyId: ${AWS_ACCESS_KEY_ID}
+  secretKey: ${AWS_SECRET_ACCESS_KEY}
+  region: eu-north-1
+  s3:
+    bucket-name: my-education-bucket

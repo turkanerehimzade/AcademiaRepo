@@ -47,7 +47,8 @@ public class SecurityConfig {
             "/v1/question/**",
             "/v1/admin/**",
             "/v1/interview/**",
-            "/v1/admin/***"
+            "/v1/admin/***",
+            "/api/s3/**"
     };
     private static final String[] COURSE_ADMIN_WHITELIST = {
             "/v1/admin-course/**",
