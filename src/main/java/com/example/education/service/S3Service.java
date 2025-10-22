@@ -1,7 +1,6 @@
 package com.example.education.service;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,32 +8,47 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.nio.file.Path;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class S3Service {
+
     private final S3Client s3Client;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
-    public void uploadFile(MultipartFile file, String fileName) {
+    @Value("${aws.region}")
+    private String region;
+
+
+    public String uploadFile(MultipartFile file) {
         try {
+            String originalName = Paths.get(file.getOriginalFilename())
+                    .getFileName().toString();
+            String sanitizedName = originalName.replaceAll("[^A-Za-z0-9._-]", "_");
+
+            String key = "uploads/" + UUID.randomUUID() + "-" + sanitizedName;
+
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(fileName)
-                    .contentType(file.getContentType())
+                    .key(key)
+                    .contentType(file.getContentType() != null ? file.getContentType() : "application/octet-stream")
                     .build();
 
             s3Client.putObject(
                     putObjectRequest,
                     RequestBody.fromInputStream(file.getInputStream(), file.getSize())
             );
-        System.out.println("✅ Fayl uğurla yükləndi: " + fileName);
-    } catch (Exception e) {
-        e.printStackTrace();
-        System.out.println("❌ Fayl yüklənərkən xəta baş verdi.");
-    }
+
+            URL url = s3Client.utilities().getUrl(b -> b.bucket(bucketName).key(key));
+            return url.toExternalForm();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("❌ Fayl yüklənərkən xəta baş verdi: " + e.getMessage());
+        }
     }
 }
