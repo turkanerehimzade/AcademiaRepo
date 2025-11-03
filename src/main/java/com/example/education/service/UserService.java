@@ -28,7 +28,6 @@ public class UserService {
         String encodedPassword = passwordEncoder.encode(userRequest.getPassword());
         userRequest.setPassword(encodedPassword);
         User user =UserMapper.INSTANCE.toEntity(userRequest);
-        user.setRoleName(roleName);
         userRepository.save(user);
         return SuccessResponse.createSuccessResponse(UserMapper.INSTANCE.toResponse(user), ResponseCode.SUCCESS);
     }
