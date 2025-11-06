@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@ToString
+@ToString(exclude = {"user"})
 @Table(name = "students")
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)

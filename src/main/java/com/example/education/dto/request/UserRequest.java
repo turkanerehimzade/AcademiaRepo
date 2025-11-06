@@ -11,8 +11,8 @@ import java.util.List;
 @ToString
 public class UserRequest {
     private String password;
-    private String name;
-    private String surname;
+    private String firstName;
+    private String lastName;
     private String phoneNumber;
     private String email;
 }

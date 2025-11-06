@@ -15,7 +15,7 @@ import java.util.Set;
 
 @Data
 @Entity
-@ToString
+@ToString(exclude = {"studentProfile", "instructorProfile"})
 @Table(name = "users")
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)

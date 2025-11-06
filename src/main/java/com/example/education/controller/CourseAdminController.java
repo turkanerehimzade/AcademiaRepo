@@ -18,7 +18,6 @@ public class CourseAdminController {
     private final UserService userService;
     @PostMapping("/sign-up")
     public SuccessResponse<UserResponse> addUser(@RequestBody UserRequest userRequest) {
-        String roleName= RoleName.COURSE_ADMIN.toString();
-        return userService.createUser(userRequest,roleName);
+        return userService.createUser(userRequest);
     }
 }

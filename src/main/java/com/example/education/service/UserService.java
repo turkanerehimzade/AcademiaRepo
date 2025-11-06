@@ -23,11 +23,12 @@ public class UserService {
     private final UserValidation validation;
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public SuccessResponse<UserResponse> createUser(UserRequest userRequest,String roleName) {
+    public SuccessResponse<UserResponse> createUser(UserRequest userRequest) {
         validation.validateUser(userRequest);
         String encodedPassword = passwordEncoder.encode(userRequest.getPassword());
         userRequest.setPassword(encodedPassword);
         User user =UserMapper.INSTANCE.toEntity(userRequest);
+        user.setRole(RoleName.USER);
         userRepository.save(user);
         return SuccessResponse.createSuccessResponse(UserMapper.INSTANCE.toResponse(user), ResponseCode.SUCCESS);
     }

@@ -11,4 +11,6 @@ public interface CourseMapper {
     CourseMapper INSTANCE = Mappers.getMapper(CourseMapper.class);
     CourseResponse entityToResponse(Course course);
     Course requestToEntity(CourseRequest courseRequest);
+
+
 }
