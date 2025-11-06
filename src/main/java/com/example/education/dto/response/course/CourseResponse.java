@@ -1,6 +1,7 @@
 package com.example.education.dto.response.course;
 
 import com.example.education.dao.entity.material.Material;
+import com.example.education.dto.response.discussion.DiscussionResponse;
 import com.example.education.dto.response.material.MaterialResponse;
 import com.example.education.dto.response.topic.TopicResponse;
 import jakarta.persistence.CascadeType;

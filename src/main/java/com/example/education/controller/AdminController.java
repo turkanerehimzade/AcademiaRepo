@@ -46,8 +46,7 @@ public class AdminController {
 
     @PostMapping("/sign-up")
     public SuccessResponse<UserResponse> addUser(@RequestBody UserRequest userRequest) {
-        String roleName= RoleName.ADMIN.toString();
-        return userService.createUser(userRequest,roleName);
+        return userService.createUser(userRequest);
     }
     @PostMapping("/interview-question")
     public SuccessResponse<String> createInterviewQuestion(InterviewRequest interviewRequest) {
