@@ -4,6 +4,7 @@ import com.example.education.dao.entity.course.Course;
 import com.example.education.dao.entity.discussion.Discussion;
 import com.example.education.dao.entity.instructor.Instructor;
 import com.example.education.dao.entity.post.Post;
+import com.example.education.dao.entity.student.Student;
 import com.example.education.dao.repository.*;
 import com.example.education.dto.request.course.CourseRequest;
 import com.example.education.dto.request.discussion.DiscussionCreateRequest;
@@ -11,7 +12,9 @@ import com.example.education.dto.request.post.PostCreateRequest;
 import com.example.education.dto.response.PageResponse;
 import com.example.education.dto.response.base.SuccessResponse;
 import com.example.education.dto.response.course.CourseDiscussionResponse;
+import com.example.education.dto.response.course.CourseNameResponse;
 import com.example.education.dto.response.course.CourseResponse;
+import com.example.education.dto.response.course.CourseSimpleResponse;
 import com.example.education.dto.response.discussion.DiscussionResponse;
 import com.example.education.dto.response.material.MaterialResponse;
 import com.example.education.dto.response.post.PostResponse;
@@ -45,6 +48,32 @@ public class CourseService {
     private final PostMapper postMapper;
 
     @Transactional(readOnly = true)
+    public SuccessResponse<List<CourseSimpleResponse>> getCoursesByStudentId(Long userId) {
+
+        List<Student> students = studentRepository.findAllByUserId(userId);
+        if (students.isEmpty()) {
+            throw new IllegalArgumentException("Student not found with userId: " + userId);
+        }
+
+        List<Course> courses = students.stream()
+                .filter(s -> s.getCourses() != null)
+                .flatMap(s -> s.getCourses().stream())
+                .distinct()
+                .toList();
+
+        if (courses.isEmpty()) {
+            throw new IllegalArgumentException("No courses found for this student");
+        }
+
+        List<CourseSimpleResponse> responses = courses.stream()
+                .map(courseMapper::toCourseSimpleResponse)
+                .toList();
+
+        return SuccessResponse.createSuccessResponse(responses, ResponseCode.SUCCESS);
+    }
+
+
+    @Transactional(readOnly = true)
     public SuccessResponse<List<CourseDiscussionResponse>> getDiscussionByCourseId(Long courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
@@ -59,11 +88,11 @@ public class CourseService {
                 course.getId(),
                 course.getTitle(),
                 course.getDescription(),
+                course.getGroupName(),
                 discussionDtos
         );
         return SuccessResponse.createSuccessResponse(List.of(courseDto), ResponseCode.SUCCESS);
     }
-
 
 
     @Transactional
@@ -76,6 +105,7 @@ public class CourseService {
                         course.getId(),
                         course.getTitle(),
                         course.getDescription(),
+                        course.getGroupName(),
                         course.getDiscussions().stream()
                                 .map(discussion -> discussionMapper.entityToResponse(discussion))
                                 .toList()
@@ -101,7 +131,6 @@ public class CourseService {
 
         CourseResponse courseResponse = courseMapper.entityToResponse(course);
 
-        // mövcud manual mapping: topics + materials
         List<TopicResponse> topicResponses = course.getTopics().stream()
                 .map(topic -> {
                     TopicResponse topicResponse = TopicMapper.INSTANCE.entityToResponse(topic);
@@ -118,24 +147,34 @@ public class CourseService {
         return SuccessResponse.createSuccessResponse(courseResponse, ResponseCode.SUCCESS);
     }
 
-    public SuccessResponse<CourseResponse> createCourse(CourseRequest courseRequest){
+    public SuccessResponse<CourseSimpleResponse> createCourse(CourseRequest courseRequest) {
+        if (courseRequest.getGroupName() == null || courseRequest.getGroupName().isBlank()) {
+            throw new IllegalArgumentException("groupName boş ola bilməz!");
+        }
+
+        if (courseRepository.existsByGroupName(courseRequest.getGroupName())) {
+            throw new IllegalStateException(
+                    "Bu qrupa aid kurs artıq mövcuddur: " + courseRequest.getGroupName()
+            );
+        }
+
         Course course = courseMapper.requestToEntity(courseRequest);
         courseRepository.save(course);
         return SuccessResponse.createSuccessResponse(
-                courseMapper.entityToResponse(course), ResponseCode.SUCCESS);
+                courseMapper.toCourseSimpleResponse(course), ResponseCode.SUCCESS);
     }
 
-    public SuccessResponse<PageResponse<CourseResponse>> getAllCourses(int page, int size) {
+    public SuccessResponse<PageResponse<CourseNameResponse>> getAllCourses(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Course> courses = courseRepository.findAll(pageable);
 
-        List<CourseResponse> courseResponses = courses.getContent().stream()
-                .map(courseMapper::entityToResponse)
+        List<CourseNameResponse> courseNameResponse = courses.getContent().stream()
+                .map(courseMapper::toResponse)
                 .collect(Collectors.toList());
 
         return SuccessResponse.createSuccessResponse(
                 new PageResponse<>(
-                        courseResponses,
+                        courseNameResponse,
                         courses.getNumber(),
                         courses.getSize(),
                         courses.getTotalElements(),
@@ -176,7 +215,7 @@ public class CourseService {
         var s = studentRepository.findById(req.studentId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        Post p = postMapper.requestToEntity(req); // yalnız content dolur
+        Post p = postMapper.requestToEntity(req);
         p.setDiscussion(d);
         p.setStudent(s);
 

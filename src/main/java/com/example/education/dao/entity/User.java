@@ -1,6 +1,5 @@
 package com.example.education.dao.entity;
 
-import com.example.education.dao.entity.BaseEntity;
 import com.example.education.dao.entity.instructor.Instructor;
 import com.example.education.dao.entity.student.Student;
 import com.example.education.enums.RoleName;
@@ -8,32 +7,39 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import javax.management.relation.Role;
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
-@ToString(exclude = {"studentProfile", "instructorProfile"})
+@ToString(exclude = {"students", "instructorProfile"})
 @Table(name = "users")
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class User extends BaseEntity {
-    @Column(nullable=false, unique=true) private String email;
-    @Column(nullable=false) private String password;
-    @Column(nullable=false) private String firstName;
-    @Column(nullable=false) private String lastName;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
     private Boolean isEmailVerified = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable=false)
+    @Column(nullable = false)
     private RoleName role;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Student studentProfile;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Student> students = new ArrayList<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Instructor instructorProfile;

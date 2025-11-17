@@ -7,12 +7,11 @@ import java.time.LocalDate;
 
 public record StudentCreateRequest(
         @Email @NotBlank String email,
-        @NotBlank String password,         // Admin yaradırsa müvəqqəti parola verə bilər
+        @NotBlank String password,
         @NotBlank String firstName,
         @NotBlank String lastName,
         String phoneNumber,
         LocalDate dateOfBirth,
-        String faculty,
-        String groupName,
+        Long courseId,
         LocalDate enrollmentDate) {
 }

@@ -6,10 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 
 public record StudentAttachRequest(
-        @Email @NotBlank String email,     // Mövcud user-in email-i
-        String faculty,
-        String groupName,
-        LocalDate dateOfBirth,
+        @Email @NotBlank String email,
+        Long courseId,
         LocalDate enrollmentDate
 ) {
 }

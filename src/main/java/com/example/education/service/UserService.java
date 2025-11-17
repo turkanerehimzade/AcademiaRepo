@@ -27,15 +27,17 @@ public class UserService {
         validation.validateUser(userRequest);
         String encodedPassword = passwordEncoder.encode(userRequest.getPassword());
         userRequest.setPassword(encodedPassword);
-        User user =UserMapper.INSTANCE.toEntity(userRequest);
-        user.setRole(RoleName.USER);
+        User user = UserMapper.INSTANCE.toEntity(userRequest);
+        user.setRole(RoleName.COURSE_ADMIN);
         userRepository.save(user);
         return SuccessResponse.createSuccessResponse(UserMapper.INSTANCE.toResponse(user), ResponseCode.SUCCESS);
     }
+
     public User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(()->new RuntimeException("User with this username not found"));
+                .orElseThrow(() -> new RuntimeException("User with this username not found"));
     }
+
     public static String encodePassword(String rawPassword) {
         return passwordEncoder.encode(rawPassword);
     }
