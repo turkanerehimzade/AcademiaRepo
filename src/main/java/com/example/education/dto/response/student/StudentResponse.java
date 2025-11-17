@@ -1,14 +1,17 @@
 package com.example.education.dto.response.student;
 
+
+import com.example.education.dto.response.course.CourseSimpleResponse;
+
 import java.time.LocalDate;
+import java.util.List;
 
 public record StudentResponse(
-        Long userId,
+        Long id,
         String email,
         String fullName,
-        String faculty,
-        String groupName,
         LocalDate dateOfBirth,
-        LocalDate enrollmentDate
+        LocalDate enrollmentDate,
+        List<CourseSimpleResponse> courses
 ) {
 }

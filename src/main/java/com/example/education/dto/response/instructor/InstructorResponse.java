@@ -1,9 +1,7 @@
 package com.example.education.dto.response.instructor;
 
-import java.time.LocalDate;
-
 public record InstructorResponse(
-        Long userId,
+        Long id,
         String email,
         String fullName,
         String specialization,

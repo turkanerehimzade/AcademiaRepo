@@ -15,19 +15,29 @@ import java.util.regex.Pattern;
 public class AuthValidation {
     private final UserRepository userRepository;
 
-    public void validateChangePassword(ChangePasswordRequest changePasswordRequest) {
+    public void validateChangePassword(ChangePasswordRequest req) {
         List<String> messages = new ArrayList<>();
-        if (changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
-        if (changePasswordRequest.getOldPassword().equals(changePasswordRequest.getNewPassword())) {
-            messages.add("Old password does not match");
-        } else if (changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
-            messages.add("New password does not match");
-        }else if (changePasswordRequest.getNewPassword().isBlank()) {
-            messages.add("Password can not be empty");
-        } else if(!Pattern.matches(Regex.PASSWORD_REGEX.getValidation(), changePasswordRequest.getNewPassword())) {
-            messages.add("Password does not match");
-        } else if (!userRepository.existsByEmail(changePasswordRequest.getEmail())) {
-            messages.add("Mail address does not exist");
+
+        if (!userRepository.existsByEmail(req.getEmail())) {
+            messages.add("Email address does not exist");
+        }
+        if (req.getNewPassword() == null || req.getNewPassword().isBlank()) {
+            messages.add("Password cannot be empty");
+        }
+        if (!req.getNewPassword().equals(req.getConfirmPassword())) {
+            messages.add("Confirm password does not match");
+        }
+        if (req.getOldPassword() != null && req.getOldPassword().equals(req.getNewPassword())) {
+            messages.add("New password cannot be same as old password");
+        }
+        if (req.getNewPassword() != null &&
+                !Pattern.matches(Regex.PASSWORD_REGEX.getValidation(), req.getNewPassword())) {
+            messages.add("Password does not meet required format");
+        }
+        if (!messages.isEmpty()) {
+            throw new IllegalArgumentException(String.join(", ", messages));
         }
     }
-}}
+}
+
+

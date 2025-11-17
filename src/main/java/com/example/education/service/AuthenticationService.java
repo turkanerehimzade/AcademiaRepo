@@ -21,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
-
 @Service
 public class AuthenticationService {
     private final AuthValidation authValidation;
@@ -37,7 +36,7 @@ public class AuthenticationService {
     private final UserMapper userMapper;
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public AuthenticationService(AuthenticationManager authenticationManager, JwtProvider jwtProvider, AuthTokenService authTokenService, AuthValidation authValidation, UserRepository userRepository,UserMapper userMapper) {
+    public AuthenticationService(AuthenticationManager authenticationManager, JwtProvider jwtProvider, AuthTokenService authTokenService, AuthValidation authValidation, UserRepository userRepository, UserMapper userMapper) {
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.authTokenService = authTokenService;
@@ -51,8 +50,8 @@ public class AuthenticationService {
         String accessToken = jwtProvider.generateToken(userPrincipal, JWT_ACCESS_EXPIRATION_IN_MS);
         String refreshToken = jwtProvider.generateToken(userPrincipal, JWT_REFRESH_EXPIRATION_IN_MS);
         authTokenService.saveTokenInfo(userPrincipal, accessToken, refreshToken);
-        User user= userRepository.findByEmail(userPrincipal.getUsername()).orElseThrow();
-        UserSignInResponse userSignInResponse= userMapper.toSignInResponse(user);
+        User user = userRepository.findByEmail(userPrincipal.getUsername()).orElseThrow();
+        UserSignInResponse userSignInResponse = userMapper.toSignInResponse(user);
         UserLoginResponse userLoginResponse = new UserLoginResponse();
         userLoginResponse.setUser(userSignInResponse);
         userLoginResponse.setAccessToken(accessToken);
@@ -80,17 +79,18 @@ public class AuthenticationService {
     }
 
     public ResponseEntity<String> changePassword(ChangePasswordRequest changePasswordRequest) {
-        authValidation.validateChangePassword(changePasswordRequest);
-        User user = userRepository.findByEmail(changePasswordRequest.getEmail()).orElse(null);
-        if (!user.getPassword().equals(changePasswordRequest.getNewPassword())) {
-            String encodedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
-            user.setPassword(encodedPassword);
-            if (user.getPassword().equals(changePasswordRequest.getNewPassword())) {
-                user.setPassword(changePasswordRequest.getNewPassword());
-                userRepository.save(user);
-                return ResponseEntity.ok("Password changed");
-            }
+        User user = userRepository.findByEmail(changePasswordRequest.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body("Old password is incorrect");
         }
-            return ResponseEntity.badRequest().body("Wrong password");
+        if (passwordEncoder.matches(changePasswordRequest.getNewPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body("New password cannot be same as old password");
+        }
+        authValidation.validateChangePassword(changePasswordRequest);
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Password changed successfully");
     }
 }
