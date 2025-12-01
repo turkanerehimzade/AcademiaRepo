@@ -6,8 +6,10 @@ import com.example.education.dto.request.interview.InterviewRequest;
 import com.example.education.dto.request.material.MaterialRequest;
 import com.example.education.dto.request.question.QuestionRequest;
 import com.example.education.dto.request.topic.TopicRequest;
+import com.example.education.dto.response.PageResponse;
 import com.example.education.dto.response.base.SuccessResponse;
 import com.example.education.dto.response.course.CourseSimpleResponse;
+import com.example.education.dto.response.instructor.InstructorMiniResponse;
 import com.example.education.dto.response.instructor.InstructorResponse;
 import com.example.education.dto.response.material.MaterialResponse;
 import com.example.education.dto.response.question.QuestionResponse;
@@ -16,10 +18,7 @@ import com.example.education.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,8 +57,12 @@ public class InstructorController {
         return interviewService.createInterviewQuestion(interviewRequest);
     }
 
-    @PostMapping("/course")
-    public SuccessResponse<CourseSimpleResponse> createCourse(@RequestBody CourseRequest courseRequest) {
-        return courseService.createCourse(courseRequest);
+    @GetMapping()
+    public SuccessResponse<PageResponse<InstructorMiniResponse>> getListInstructor(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return instructorService.getListInstructor(page, size);
     }
+
 }

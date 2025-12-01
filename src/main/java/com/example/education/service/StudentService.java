@@ -8,12 +8,22 @@ import com.example.education.dao.repository.StudentRepository;
 import com.example.education.dao.repository.UserRepository;
 import com.example.education.dto.request.student.StudentAttachRequest;
 import com.example.education.dto.request.student.StudentCreateRequest;
+import com.example.education.dto.response.PageResponse;
+import com.example.education.dto.response.base.SuccessResponse;
 import com.example.education.dto.response.course.CourseSimpleResponse;
+import com.example.education.dto.response.student.StudentMiniResponse;
 import com.example.education.dto.response.student.StudentResponse;
+import com.example.education.enums.ResponseCode;
 import com.example.education.enums.RoleName;
 import com.example.education.enums.StudentStatus;
+import com.example.education.mapper.StudentMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +37,29 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
     private final CourseRepository courseRepository;
+    private final StudentMapper studentMapper;
+
+    @Transactional(readOnly = true)
+    public SuccessResponse<PageResponse<StudentMiniResponse>> getAllStudents(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<Student> studentPage = studentRepository.findAll(pageable);
+
+        List<StudentMiniResponse> responses = studentPage.getContent().stream()
+                .map(studentMapper::toMini)
+                .toList();
+
+        PageResponse<StudentMiniResponse> pageResponse = new PageResponse<>(
+                responses,
+                studentPage.getNumber(),
+                studentPage.getSize(),
+                studentPage.getTotalElements(),
+                studentPage.getTotalPages(),
+                studentPage.isFirst(),
+                studentPage.isLast()
+        );
+
+        return SuccessResponse.createSuccessResponse(pageResponse, ResponseCode.SUCCESS);
+    }
 
     private StudentResponse toResponse(User user, Student s) {
         String fullName = user.getFirstName() + " " + user.getLastName();
@@ -115,6 +148,5 @@ public class StudentService {
 
         return toResponse(user, s);
     }
-
 }
 
